@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Usuario - Aplicación Web Vulnerable</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">App Vulnerable</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('search') }}">Búsqueda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('network_tool') }}">Herramienta de Red</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('file_reader') }}">Lector de Archivos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('check_website') }}">Verificar Sitio Web</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">Panel ({{ session['username'] }})</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Información del usuario -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Perfil de Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        <h3>¡Bienvenido, {{ session['username'] }}!</h3>
+                        <p><strong>Rol:</strong> {{ session['role'] }}</p>
+                        <p>Has iniciado sesión correctamente en esta aplicación vulnerable para pruebas.</p>
+                    </div>
+                </div>
+
+                <!-- Resumen de vulnerabilidades -->
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">Resumen de Vulnerabilidades</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Inyección SQL
+                                <span class="badge bg-danger rounded-pill">Alta</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Inyección de Comandos
+                                <span class="badge bg-danger rounded-pill">Alta</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Validación de Entrada Incorrecta
+                                <span class="badge bg-warning rounded-pill">Media</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                SSRF
+                                <span class="badge bg-danger rounded-pill">Alta</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <!-- Actividades y rutas vulnerables -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Actividades Disponibles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a href="{{ url_for('search') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Búsqueda de Productos</h5>
+                                    <small class="text-danger">Inyección SQL</small>
+                                </div>
+                                <p class="mb-1">Busca productos con parámetros vulnerables a inyección SQL.</p>
+                            </a>
+                            <a href="{{ url_for('network_tool') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Herramienta de Red</h5>
+                                    <small class="text-danger">Inyección de Comandos</small>
+                                </div>
+                                <p class="mb-1">Ejecuta comandos ping con entradas vulnerables a inyección de comandos.</p>
+                            </a>
+                            <a href="{{ url_for('file_reader') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Lector de Archivos</h5>
+                                    <small class="text-danger">Inyección de Comandos</small>
+                                </div>
+                                <p class="mb-1">Lee archivos del sistema con validación inadecuada de entradas.</p>
+                            </a>
+                            <a href="{{ url_for('check_website') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Verificador de Sitios Web</h5>
+                                    <small class="text-danger">SSRF</small>
+                                </div>
+                                <p class="mb-1">Verifica sitios web con vulnerabilidad SSRF para acceder a recursos internos.</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
