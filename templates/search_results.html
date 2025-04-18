@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Búsqueda - Aplicación Web Vulnerable</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">App Vulnerable</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('search') }}">Búsqueda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('network_tool') }}">Herramienta de Red</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('file_reader') }}">Lector de Archivos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('check_website') }}">Verificar Sitio Web</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if 'username' in session %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Panel ({{ session['username'] }})</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Búsqueda de Productos</h1>
+        
+        <!-- Formulario de búsqueda vulnerable a inyección SQL -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="{{ url_for('search') }}" method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="keyword" class="form-label">Palabra clave:</label>
+                        <input type="text" class="form-control" id="keyword" name="keyword" value="{{ keyword }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="category" class="form-label">Categoría:</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="" {% if not category %}selected{% endif %}>Todas las categorías</option>
+                            <option value="Electrónica" {% if category == 'Electrónica' %}selected{% endif %}>Electrónica</option>
+                            <option value="Accesorios" {% if category == 'Accesorios' %}selected{% endif %}>Accesorios</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Resultados de la búsqueda -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Resultados de la búsqueda</h5>
+            </div>
+            <div class="card-body">
+                {% if products|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Precio</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product['id'] }}</td>
+                                <td>{{ product['name'] }}</td>
+                                <td>{{ product['description'] }}</td>
+                                <td>${{ product['price'] }}</td>
+                                <td>{{ product['category'] }}</td>
+                                <td>
+                                    <a href="{{ url_for('product_detail', product_id=product['id']) }}" class="btn btn-sm btn-info">Ver detalles</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center">No se encontraron productos que coincidan con tu búsqueda.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Información de Vulnerabilidad -->
+        <div class="card mt-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Información de Vulnerabilidad</h5>
+            </div>
+            <div class="card-body">
+                <h6>Vulnerabilidad: Inyección SQL</h6>
+                <p>Esta función de búsqueda es vulnerable a ataques de inyección SQL. La aplicación construye consultas SQL directamente con la entrada del usuario sin sanitización ni parameterización.</p>
+                <p><strong>Ejemplos de payloads maliciosos:</strong></p>
+                <ul>
+                    <li><code>' OR '1'='1</code> (Muestra todos los productos)</li>
+                    <li><code>%' UNION SELECT id, username, password, email, role FROM users WHERE '1'='1</code> (Intenta extraer información de la tabla de usuarios)</li>
+                    <li><code>%'; DROP TABLE products; --</code> (Intenta eliminar la tabla de productos)</li>
+                </ul>
+                <p><strong>Punto de entrada:</strong> Parámetros GET de la URL</p>
+                <p><strong>Cómo se detecta:</strong> Dynatrace identifica este tipo de vulnerabilidad y muestra la sentencia SQL afectada.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
