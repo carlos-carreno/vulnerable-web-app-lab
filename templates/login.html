@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Aplicación Web Vulnerable</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">App Vulnerable</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-center">Iniciar Sesión</h2>
+                    </div>
+                    <div class="card-body">
+                        {% if error %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endif %}
+                        
+                        <!-- VULNERABLE: Los datos se envían directamente a una consulta SQL vulnerable -->
+                        <form method="POST" action="{{ url_for('login') }}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Nombre de Usuario:</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <!-- Vulnerable hint in HTML comment -->
+                                <!-- Prueba con: admin' -- o con ' OR '1'='1 -->
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p class="mb-0">¿No tienes una cuenta? <a href="{{ url_for('register') }}">Regístrate</a></p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0">Información de Vulnerabilidad</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Vulnerabilidad: Inyección SQL</h6>
+                            <p>Este formulario es vulnerable a ataques de inyección SQL. La aplicación construye consultas SQL directamente con la entrada del usuario sin sanitización ni parameterización.</p>
+                            <p><strong>Ejemplos de payloads maliciosos:</strong></p>
+                            <ul>
+                                <li><code>admin' --</code> (Inicia sesión como admin sin contraseña)</li>
+                                <li><code>' OR '1'='1' --</code> (Inicia sesión como el primer usuario en la base de datos)</li>
+                                <li><code>' UNION SELECT 1, 'hacker', 'password', 'hacker@evil.com', 'admin' --</code> (Intenta realizar una unión SQL)</li>
+                            </ul>
+                            <p><strong>Punto de entrada:</strong> Parámetros POST del formulario</p>
+                            <p><strong>Cómo se detecta:</strong> Dynatrace identifica este tipo de vulnerabilidad y muestra la sentencia SQL afectada.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
