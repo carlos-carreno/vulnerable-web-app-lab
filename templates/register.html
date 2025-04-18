@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Aplicación Web Vulnerable</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">App Vulnerable</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('register') }}">Registrarse</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-center">Registro de Usuario</h2>
+                    </div>
+                    <div class="card-body">
+                        {% if error %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endif %}
+                        
+                        <!-- VULNERABLE: No hay validación adecuada en el lado del servidor -->
+                        <form method="POST" action="{{ url_for('register') }}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Nombre de Usuario:</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <!-- Vulnerable: no se valida longitud mínima/máxima ni caracteres especiales -->
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <!-- Vulnerable: no se valida fuerza de contraseña -->
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Correo Electrónico:</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <!-- La validación básica de tipo email es del navegador, pero se puede evitar -->
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Registrarse</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p class="mb-0">¿Ya tienes una cuenta? <a href="{{ url_for('login') }}">Iniciar Sesión</a></p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0">Información de Vulnerabilidad</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Vulnerabilidad: Validación de Entrada Incorrecta</h6>
+                            <p>Este formulario es vulnerable debido a una validación inadecuada de las entradas del usuario. La aplicación no verifica correctamente la longitud, formato o caracteres especiales en los campos de entrada.</p>
+                            <p><strong>Ejemplos de payloads maliciosos:</strong></p>
+                            <ul>
+                                <li>Nombres de usuario extremadamente largos (probar con más de 1000 caracteres)</li>
+                                <li>Caracteres especiales en el nombre de usuario (script de XSS: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>)</li>
+                                <li>Correos electrónicos con formato incorrecto (manipulando la petición HTTP directamente)</li>
+                                <li>Contraseñas demasiado cortas o débiles (no hay validación de seguridad)</li>
+                            </ul>
+                            <p><strong>Punto de entrada:</strong> Parámetros POST del formulario</p>
+                            <p><strong>Cómo se detecta:</strong> Dynatrace identifica la "improper input validation" como un tipo de vulnerabilidad.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
