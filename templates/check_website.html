@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Sitio Web - Aplicación Web Vulnerable</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">App Vulnerable</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('search') }}">Búsqueda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('network_tool') }}">Herramienta de Red</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('file_reader') }}">Lector de Archivos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('check_website') }}">Verificar Sitio Web</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if 'username' in session %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Panel ({{ session['username'] }})</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Verificador de Sitios Web</h1>
+        
+        <!-- Formulario vulnerable a SSRF -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="{{ url_for('check_website') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL del sitio web:</label>
+                        <input type="text" class="form-control" id="url" name="url" placeholder="Ejemplo: https://example.com" required>
+                        <!-- Vulnerable: No hay validación de URL ni restricciones -->
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verificar Sitio</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Información de estado y vista previa -->
+        {% if status %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Estado del Sitio</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ status }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if preview %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Vista Previa del Contenido</h5>
+            </div>
+            <div class="card-body">
+                <pre class="bg-light p-3 rounded">{{ preview }}</pre>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Información adicional sobre el endpoint de API -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">API Endpoint</h5>
+            </div>
+            <div class="card-body">
+                <p>También puedes usar el endpoint de API para verificar sitios web:</p>
+                <code>GET /api/fetch_resource?url=https://example.com</code>
+                <p class="mt-2">Ejemplo de respuesta JSON:</p>
+                <pre class="bg-light p-3 rounded">{
+  "status": 200,
+  "content_type": "text/html; charset=utf-8",
+  "content": "<!DOCTYPE html>..."
+}</pre>
+            </div>
+        </div>
+        
+        <!-- Información de Vulnerabilidad -->
+        <div class="card mt-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Información de Vulnerabilidad</h5>
+            </div>
+            <div class="card-body">
+                <h6>Vulnerabilidad: SSRF (Server-Side Request Forgery)</h6>
+                <p>Esta herramienta es vulnerable a ataques SSRF. La aplicación realiza solicitudes a URLs proporcionadas por el usuario sin validación ni restricciones adecuadas.</p>
+                <p><strong>Ejemplos de payloads maliciosos:</strong></p>
+                <ul>
+                    <li><code>http://localhost:5000</code> (Acceso a la propia aplicación)</li>
+                    <li><code>http://localhost:22</code> (Escaneo de puertos internos)</li>
+                    <li><code>http://10.0.0.1</code> (Acceso a redes internas)</li>
+                    <li><code>file:///etc/passwd</code> (Acceso a archivos locales)</li>
+                    <li><code>http://169.254.169.254/latest/meta-data/</code> (Acceso a metadatos de AWS en entornos cloud)</li>
+                </ul>
+                <p><strong>Puntos de entrada:</strong></p>
+                <ul>
+                    <li>Parámetro POST del formulario</li>
+                    <li>Parámetro GET de la URL en el endpoint de API</li>
+                </ul>
+                <p><strong>Cómo se detecta:</strong> Dynatrace lista SSRF como un tipo de vulnerabilidad y puede detectar solicitudes a recursos internos o no autorizados.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
