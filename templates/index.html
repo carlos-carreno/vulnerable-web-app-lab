@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Web Vulnerable - Inicio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">App Vulnerable</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('search') }}">Búsqueda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('network_tool') }}">Herramienta de Red</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('file_reader') }}">Lector de Archivos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('check_website') }}">Verificar Sitio Web</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if 'username' in session %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Panel ({{ session['username'] }})</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Registrarse</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="jumbotron">
+            <h1 class="display-4">¡Bienvenido a la Aplicación Web Vulnerable!</h1>
+            <p class="lead">Esta aplicación contiene vulnerabilidades intencionales para fines de aprendizaje y pruebas.</p>
+            <hr class="my-4">
+            <p>Explora las diferentes secciones para identificar y explotar las vulnerabilidades:</p>
+            <div class="list-group mb-4">
+                <a href="{{ url_for('login') }}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">Inyección SQL</h5>
+                    <p class="mb-1">Prueba la funcionalidad de inicio de sesión y búsqueda para explotar vulnerabilidades de inyección SQL.</p>
+                </a>
+                <a href="{{ url_for('network_tool') }}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">Inyección de Comandos</h5>
+                    <p class="mb-1">Utiliza las herramientas de red y lectura de archivos para explotar vulnerabilidades de inyección de comandos.</p>
+                </a>
+                <a href="{{ url_for('register') }}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">Validación de Entrada Incorrecta</h5>
+                    <p class="mb-1">Prueba los formularios de registro y comentarios para explotar vulnerabilidades de validación de entrada.</p>
+                </a>
+                <a href="{{ url_for('check_website') }}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">SSRF (Server-Side Request Forgery)</h5>
+                    <p class="mb-1">Utiliza la funcionalidad de verificación de sitios web para explotar vulnerabilidades SSRF.</p>
+                </a>
+            </div>
+            <p><strong>ADVERTENCIA:</strong> Esta aplicación es solo para fines educativos y de pruebas. No la utilices en entornos de producción o para atacar sistemas sin autorización.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
